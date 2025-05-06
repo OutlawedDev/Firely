@@ -2,34 +2,37 @@
 
 echo "🟣 Downloading Firely Interface Suite..."
 
-# Direct DMG download URL
 DOWNLOAD_URL="https://github.com/OutlawedDev/Firely-Interface-Suite/releases/download/0.1.0/Firely.Interface_0.1.0_universal.dmg"
+DMG_FILE="Firely.Interface_0.1.0_universal.dmg"
 
-# Local filename
-DMG_NAME="Firely.Interface_0.1.0_universal.dmg"
-
-# Mount point name
-MOUNT_DIR="/Volumes/Firely Interface"
-
-# Download the DMG
-curl -L -o "$DMG_NAME" "$DOWNLOAD_URL"
-
+curl -L -o "$DMG_FILE" "$DOWNLOAD_URL"
 echo "✅ Download complete."
 
-# Mount the DMG
-echo "📦 Mounting the installer..."
-hdiutil attach "$DMG_NAME" -mountpoint "$MOUNT_DIR" -nobrowse -quiet
+echo "📦 Mounting DMG..."
+MOUNT_OUTPUT=$(hdiutil attach "$DMG_FILE" -nobrowse -quiet)
+MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep -o '/Volumes/[^"]*')
 
-# Copy app to Applications folder
-echo "📥 Copying Firely Interface Suite to /Applications..."
-cp -R "$MOUNT_DIR/Firely Interface.app" /Applications/
+if [ -z "$MOUNT_POINT" ]; then
+  echo "❌ Failed to mount the DMG."
+  exit 1
+fi
 
-# Remove quarantine flag to bypass Gatekeeper
+APP_NAME="Firely Interface.app"
+APP_PATH="$MOUNT_POINT/$APP_NAME"
+
+if [ ! -d "$APP_PATH" ]; then
+  echo "❌ App not found in DMG."
+  hdiutil detach "$MOUNT_POINT"
+  exit 1
+fi
+
+echo "📥 Installing to /Applications..."
+sudo cp -R "$APP_PATH" /Applications/
+
 echo "🔓 Removing quarantine flag..."
-xattr -dr com.apple.quarantine "/Applications/Firely Interface.app"
+sudo xattr -dr com.apple.quarantine "/Applications/$APP_NAME"
 
-# Unmount DMG
-echo "💾 Cleaning up..."
-hdiutil detach "$MOUNT_DIR" -quiet
+echo "💾 Unmounting..."
+hdiutil detach "$MOUNT_POINT" -quiet
 
-echo "✅ Firely Interface Suite installed and ready to use."
+echo "✅ Firely Interface Suite installed successfully."
