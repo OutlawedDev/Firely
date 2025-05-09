@@ -1,38 +1,23 @@
 #!/bin/bash
 
-echo "🟣 Downloading Firely Interface Suite..."
+APP_NAME="Firely Interface"
+APP_DIR="$HOME/Desktop/$APP_NAME.app"
+CONTENTS="$APP_DIR/Contents"
+MACOS="$CONTENTS/MacOS"
+RESOURCES="$CONTENTS/Resources"
 
-DOWNLOAD_URL="https://github.com/OutlawedDev/Firely-Interface-Suite/releases/download/0.1.0/Firely.Interface_0.1.0_universal.dmg"
-DMG_FILE="Firely.Interface_0.1.0_universal.dmg"
+echo "🛠 Creating bundle structure..."
+mkdir -p "$MACOS"
+mkdir -p "$RESOURCES"
 
-curl -L -o "$DMG_FILE" "$DOWNLOAD_URL"
-echo "✅ Download complete."
+echo "⬇️ Downloading app files..."
 
-echo "📦 Mounting DMG..."
-MOUNT_OUTPUT=$(hdiutil attach "$DMG_FILE" -nobrowse -quiet)
-MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep -o '/Volumes/[^"]*')
+curl -L -o "$MACOS/Firely Interface" "https://github.com/OutlawedDev/Firely/releases/download/2.0.0/Firely.Interface.app.zip"
+curl -L -o "$CONTENTS/Info.plist" "https://raw.githubusercontent.com/alexkkork/ui-testing/main/Firely%20Interface.app/Contents/Info.plist"
+curl -L -o "$RESOURCES/icon.icns" "https://raw.githubusercontent.com/alexkkork/ui-testing/main/Firely%20Interface.app/Contents/Resources/icon.icns"
 
-if [ -z "$MOUNT_POINT" ]; then
-  echo "❌ Failed to mount the DMG."
-  exit 1
-fi
+echo "🔐 Setting permissions..."
+chmod +x "$MACOS/Firely Interface"
 
-APP_NAME="Firely Interface.app"
-APP_PATH="$MOUNT_POINT/$APP_NAME"
-
-if [ ! -d "$APP_PATH" ]; then
-  echo "❌ App not found in DMG."
-  hdiutil detach "$MOUNT_POINT"
-  exit 1
-fi
-
-echo "📥 Installing to /Applications..."
-sudo cp -R "$APP_PATH" /Applications/
-
-echo "🔓 Removing quarantine flag..."
-sudo xattr -dr com.apple.quarantine "/Applications/$APP_NAME"
-
-echo "💾 Unmounting..."
-hdiutil detach "$MOUNT_POINT" -quiet
-
-echo "✅ Firely Interface Suite installed successfully."
+echo "✅ App created: $APP_DIR"
+open -R "$APP_DIR"
