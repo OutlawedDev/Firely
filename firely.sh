@@ -1,10 +1,10 @@
 #!/bin/bash
 
-ZIP_URL="https://github.com/your-user/your-repo/releases/download/v1.0/Firely.Interface.app.zip"
+ZIP_URL="https://github.com/OutlawedDev/Firely/releases/download/2.0.0/Firely.Interface.app.zip"
 TMP_ZIP="/tmp/Firely.Interface.app.zip"
 UNZIP_DIR="/tmp/firely_unzip"
 APP_NAME="Firely Interface.app"
-DEST_DIR="$HOME/Downloads"
+DEST_DIR="/Applications"
 
 echo "⬇️ Downloading app zip..."
 curl -L -o "$TMP_ZIP" "$ZIP_URL"
@@ -21,15 +21,15 @@ if [ -d "$MACOSX_FOLDER" ]; then
   rm -rf "$MACOSX_FOLDER"
 fi
 
-echo "📁 Moving app to Downloads..."
-mv -f "$UNZIP_DIR/$APP_NAME" "$DEST_DIR/$APP_NAME"
+echo "📁 Moving app to Applications..."
+sudo mv -f "$UNZIP_DIR/$APP_NAME" "$DEST_DIR/$APP_NAME"
 
 echo "🔐 Removing quarantine flag..."
-xattr -dr com.apple.quarantine "$DEST_DIR/$APP_NAME"
+sudo xattr -dr com.apple.quarantine "$DEST_DIR/$APP_NAME"
 
 echo "🧼 Cleaning up temp files..."
 rm -rf "$TMP_ZIP" "$UNZIP_DIR"
 
-echo "✅ App is ready in Downloads."
+echo "✅ App is ready in Applications."
 echo "🚀 Launching app..."
 open "$DEST_DIR/$APP_NAME"
